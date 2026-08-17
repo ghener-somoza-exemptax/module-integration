@@ -6,7 +6,7 @@
         Merchants paste Callback URL + Identity Link URL from EXEMPTAX (env-specific).
         Do not hardcode those URLs here — local / DEV / prod differ.
     -->
-    <integration name="Exemptax">
+    <integration name="EXEMPTAX">
         <email>support@exemptax.com</email>
     </integration>
 </integrations>
