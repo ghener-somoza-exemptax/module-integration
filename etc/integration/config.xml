@@ -2,9 +2,8 @@
 <integrations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Integration:etc/integration.xsd">
     <!--
-        Pre-creates System → Integrations → Exemptax on module install.
-        Merchants paste Callback URL + Identity Link URL from EXEMPTAX (env-specific).
-        Do not hardcode those URLs here — local / DEV / prod differ.
+        Callback URL + Identity Link URL are pasted in Admin (env-specific).
+        System → Integrations → EXEMPTAX is created by Setup/Patch/Data/CreateExemptaxIntegration.
     -->
     <integration name="EXEMPTAX">
         <email>support@exemptax.com</email>
