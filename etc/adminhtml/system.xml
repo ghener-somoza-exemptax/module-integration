@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="exemptax" translate="label" sortOrder="400">
+            <label>EXEMPTAX</label>
+        </tab>
+        <section id="exemptax_integration" translate="label" sortOrder="10"
+                 showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Integration</label>
+            <tab>exemptax</tab>
+            <resource>Exemptax_Integration::config</resource>
+            <group id="general" translate="label" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>General</label>
+                <!-- Connection fields are populated by EXEMPTAX REST, not edited in Admin. -->
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="0" showInWebsite="0" showInStore="0">
+                    <label>Enable webhooks</label>
+                    <comment>When enabled, Adobe Commerce sends customer create, update, and delete events to EXEMPTAX automatically.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="webhook_url" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="0" showInWebsite="0" showInStore="0">
+                    <label>Webhook URL</label>
+                    <comment>The EXEMPTAX endpoint that receives Adobe Commerce customer events. This URL is provided by EXEMPTAX.</comment>
+                    <validate>validate-url</validate>
+                </field>
+                <field id="settings_url" translate="label comment" type="text" sortOrder="25"
+                       showInDefault="0" showInWebsite="0" showInStore="0">
+                    <label>Settings URL</label>
+                    <comment>The EXEMPTAX API endpoint used to load and save integration settings for this Adobe Commerce store. This is normally populated automatically when the integration is connected.</comment>
+                    <validate>validate-url</validate>
+                </field>
+                <field id="ex_key" translate="label comment" type="textarea" sortOrder="30"
+                       showInDefault="0" showInWebsite="0" showInStore="0">
+                    <label>EXEMPTAX ex-key</label>
+                    <comment>Paste the EXEMPTAX integration key provided during the Adobe Commerce connection. This key authenticates requests between Adobe Commerce and EXEMPTAX. Do not modify or encrypt the value before saving.</comment>
+                </field>
+                <field id="verify_ssl" translate="label comment" type="select" sortOrder="40"
+                       showInDefault="0" showInWebsite="0" showInStore="0">
+                    <label>Verify SSL</label>
+                    <comment>When enabled, SSL certificates are verified when Adobe Commerce communicates with EXEMPTAX. Keep this enabled for production environments.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="apply_state_exemptions" translate="label comment" type="select" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Apply state-based tax exemptions</label>
+                    <comment>When enabled, EXEMPTAX applies a $0 tax result when the customer's ship-to state is covered by a valid EXEMPTAX exemption. Applies to Adobe Commerce native tax calculation only.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="ecommerce_drop_enabled" translate="label comment" type="select" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable ecommerce certificate link</label>
+                    <comment>When enabled, logged-in customers can access their EXEMPTAX Tax-Exempt Certificates from My Account.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="ecommerce_drop_url" translate="label comment" type="text" sortOrder="70"
+                       showInDefault="0" showInWebsite="0" showInStore="0">
+                    <label>Ecommerce drop URL</label>
+                    <comment>The EXEMPTAX URL where customers can access the tax-exemption certificate form. This is normally populated automatically when the integration is connected.</comment>
+                    <validate>validate-url</validate>
+                </field>
+            </group>
+        </section>
+        <section id="exemptax_settings" translate="label" sortOrder="20"
+                 showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Settings</label>
+            <tab>exemptax</tab>
+            <resource>Exemptax_Integration::config</resource>
+            <group id="company" translate="label" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Adobe Commerce settings</label>
+                <comment><![CDATA[Live mirror of EXEMPTAX Adobe Commerce settings. Load and <strong>Save Changes</strong> in this panel (not the top Save Config) write to EXEMPTAX so clients do not need to open the EXEMPTAX app.]]></comment>
+                <field id="mirror" translate="label" type="note" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <frontend_model>Exemptax\Integration\Block\Adminhtml\System\Config\CompanySettings</frontend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

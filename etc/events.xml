@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- After DB commit (model save). Prefer over customer_save_after which runs pre-commit. -->
+    <event name="customer_save_commit_after">
+        <observer name="exemptax_integration_customer_save_commit_after"
+                  instance="Exemptax\Integration\Observer\CustomerSaveCommitAfter"/>
+    </event>
+    <!-- After CustomerRepository::save() finishes (incl. addresses). -->
+    <event name="customer_save_after_data_object">
+        <observer name="exemptax_integration_customer_save_after_data_object"
+                  instance="Exemptax\Integration\Observer\CustomerSaveAfterDataObject"/>
+    </event>
+    <event name="customer_delete_commit_after">
+        <observer name="exemptax_integration_customer_delete_commit_after"
+                  instance="Exemptax\Integration\Observer\CustomerDeleteCommitAfter"/>
+    </event>
+    <!-- Address-only paths (AddressRepository). Deduped with customer save webhooks. -->
+    <event name="customer_address_save_commit_after">
+        <observer name="exemptax_integration_customer_address_save_commit_after"
+                  instance="Exemptax\Integration\Observer\CustomerAddressSaveCommitAfter"/>
+    </event>
+    <!-- delete_before: resource delete clears address data before delete_commit_after -->
+    <event name="customer_address_delete_before">
+        <observer name="exemptax_integration_customer_address_delete_before"
+                  instance="Exemptax\Integration\Observer\CustomerAddressDeleteBefore"/>
+    </event>
+    <event name="sales_quote_address_collect_totals_after">
+        <observer name="exemptax_integration_quote_address_collect_totals_after"
+                  instance="Exemptax\Integration\Observer\QuoteAddressCollectTotalsAfter"/>
+    </event>
+</config>

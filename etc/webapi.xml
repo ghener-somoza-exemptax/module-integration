@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/exemptax/integration/webhook-settings" method="PUT">
+        <service class="Exemptax\Integration\Api\WebhookSettingsManagementInterface" method="save"/>
+        <resources>
+            <resource ref="Exemptax_Integration::webhook_settings"/>
+        </resources>
+    </route>
+    <route url="/V1/exemptax/integration/webhook-settings" method="GET">
+        <service class="Exemptax\Integration\Api\WebhookSettingsManagementInterface" method="get"/>
+        <resources>
+            <resource ref="Exemptax_Integration::webhook_settings"/>
+        </resources>
+    </route>
+</routes>

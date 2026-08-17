@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- Storefront footer: popup link under CMS links (About us / Customer Service), not an iframe -->
+        <referenceContainer name="cms_footer_links_container">
+            <block class="Exemptax\Integration\Block\Customer\EcommerceDropLink"
+                   name="exemptax.footer.ecommerce.drop"
+                   template="Exemptax_Integration::customer/ecommerce_drop_link.phtml"
+                   cacheable="false"
+                   after="-">
+                <arguments>
+                    <argument name="mode" xsi:type="string">popup</argument>
+                    <argument name="link_label" xsi:type="string" translate="true">Tax-Exempt Certificates</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

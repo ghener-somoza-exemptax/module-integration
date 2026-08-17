@@ -1,0 +1,460 @@
+<?php
+/** @var \Exemptax\Integration\Block\Adminhtml\System\Config\CompanySettings $block */
+$settings = $block->getSettings();
+$loadError = $block->getLoadError();
+$locked = $block->isLocked();
+$taxEngine = (string) ($settings['tax_engine'] ?? 'magento');
+$taxExemptFlag = (int) ($settings['tax_exempt_flag'] ?? 0);
+$rawLastSync = $block->getRawLastSync();
+$localGroups = $block->getLocalCustomerGroups();
+$selectedGroupIds = $block->getSelectedCustomerGroupIds();
+$syncCustomerTags = (int) ($settings['sync_customer_tags'] ?? 0);
+?>
+<style>
+.exemptax-settings-cell {
+    padding: 0 !important;
+}
+.exemptax-company-settings {
+    max-width: 720px;
+    margin: 0.5rem 0 1.5rem;
+    text-align: left;
+}
+.exemptax-company-settings .exx-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin: 0 0 1.25rem;
+    padding: 0.75rem 1rem;
+    background: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #303030;
+}
+.exemptax-company-settings .exx-status strong {
+    font-weight: 600;
+}
+.exemptax-company-settings .exx-field {
+    margin: 0 0 1.35rem;
+}
+.exemptax-company-settings .exx-field > label {
+    display: block;
+    margin: 0 0 0.4rem;
+    font-weight: 600;
+    font-size: 14px;
+    color: #303030;
+}
+.exemptax-company-settings .exx-field select {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 0.45rem 0.65rem;
+    font-size: 14px;
+}
+.exemptax-company-settings .exx-field select.admin__control-multiselect {
+    width: 100%;
+    max-width: 100%;
+    min-height: 8.5rem;
+    height: auto;
+    padding: 0;
+}
+.exemptax-company-settings .exx-help {
+    margin: 0.45rem 0 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #757575;
+}
+.exemptax-company-settings .exx-confirm {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin: 0 0 1.25rem;
+    padding: 0.85rem 1rem;
+    background: #fafafa;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.45;
+}
+.exemptax-company-settings .exx-confirm input {
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+}
+.exemptax-company-settings .exx-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+}
+.exemptax-company-settings .exx-actions .primary {
+    min-width: 9rem;
+}
+.exemptax-company-settings .exx-message {
+    font-size: 13px;
+}
+.exemptax-company-settings .exx-hint {
+    margin: 0.85rem 0 0;
+    font-size: 12px;
+    color: #757575;
+}
+.exemptax-company-settings .message {
+    margin: 0 0 1rem;
+}
+.exemptax-company-settings.is-disabled .exx-fields {
+    opacity: 0.55;
+    pointer-events: none;
+}
+</style>
+
+<div class="exemptax-company-settings<?= $loadError ? ' is-disabled' : '' ?>"
+     data-status-url="<?= $block->escapeUrl($block->getStatusUrl()) ?>"
+     data-save-url="<?= $block->escapeUrl($block->getSaveUrl()) ?>"
+     data-form-key="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"
+     data-locked="<?= $locked ? '1' : '0' ?>">
+    <?php if ($loadError): ?>
+        <div class="message message-error"><?= $block->escapeHtml($loadError) ?></div>
+    <?php endif; ?>
+
+    <div class="message message-warning exemptax-settings-locked" style="<?= $locked ? '' : 'display:none;' ?>">
+        <strong><?= $block->escapeHtml(__('Sync in progress')) ?></strong>
+        — <?= $block->escapeHtml(__('Settings are locked until your previous sync is complete. Use Refresh to check again.')) ?>
+    </div>
+
+    <div class="exx-status">
+        <div>
+            <strong><?= $block->escapeHtml(__('Last sync')) ?>:</strong>
+            <span class="exemptax-last-sync-value"
+                  data-raw="<?= $block->escapeHtmlAttr($rawLastSync ?? '') ?>">
+                <?= $locked || !$rawLastSync
+                    ? $block->escapeHtml(__('Waiting for sync…'))
+                    : $block->escapeHtml(__('Loading…')) ?>
+            </span>
+        </div>
+    </div>
+
+    <div class="exx-fields">
+        <div class="exx-field">
+            <label for="exemptax_tax_engine"><?= $block->escapeHtml(__('Tax engine')) ?></label>
+            <select id="exemptax_tax_engine" <?= $locked ? 'disabled' : '' ?>>
+                <?php foreach ($block->getTaxEngineOptions() as $option): ?>
+                    <option value="<?= $block->escapeHtmlAttr($option['value']) ?>"
+                        <?= $taxEngine === $option['value'] ? 'selected' : '' ?>>
+                        <?= $block->escapeHtml($option['label']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="exx-help">
+                <?= $block->escapeHtml(__('Selects which Adobe Commerce tax calculator EXEMPTAX writes exemption data for at checkout.')) ?>
+            </p>
+        </div>
+
+        <div class="exx-field">
+            <label for="exemptax_tax_exempt_flag"><?= $block->escapeHtml(__('Exemption status update automation')) ?></label>
+            <select id="exemptax_tax_exempt_flag" <?= $locked ? 'disabled' : '' ?>>
+                <?php foreach ($block->getExemptionAutomationOptions() as $option): ?>
+                    <option value="<?= (int) $option['value'] ?>"
+                        <?= $taxExemptFlag === (int) $option['value'] ? 'selected' : '' ?>>
+                        <?= $block->escapeHtml($option['label']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="exx-help">
+                <?= $block->escapeHtml(__('Defines when EXEMPTAX updates a customer’s tax exemption status in Adobe Commerce.')) ?>
+            </p>
+        </div>
+
+        <div class="exx-field">
+            <label for="exemptax_ac_customer_groups"><?= $block->escapeHtml(__('Customer groups')) ?></label>
+            <select id="exemptax_ac_customer_groups"
+                    class="admin__control-multiselect"
+                    multiple
+                    size="6"
+                    <?= $locked ? 'disabled' : '' ?>>
+                <?php foreach ($localGroups as $group): ?>
+                    <?php $gid = (string) $group['id']; ?>
+                    <option value="<?= $block->escapeHtmlAttr($gid) ?>"
+                        <?= in_array($gid, $selectedGroupIds, true) ? 'selected' : '' ?>>
+                        <?= $block->escapeHtml($group['code']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="exx-help">
+                <?= $block->escapeHtml(__(
+                    'All Magento customer groups are selected by default. Remove any group whose customers should be synchronized as inactive in EXEMPTAX.'
+                )) ?>
+            </p>
+        </div>
+
+        <div class="exx-field">
+            <label for="exemptax_sync_customer_tags"><?= $block->escapeHtml(__('Sync customer groups as tags')) ?></label>
+            <select id="exemptax_sync_customer_tags" <?= $locked ? 'disabled' : '' ?>>
+                <option value="0" <?= $syncCustomerTags === 0 ? 'selected' : '' ?>>
+                    <?= $block->escapeHtml(__('Disabled')) ?>
+                </option>
+                <option value="1" <?= $syncCustomerTags === 1 ? 'selected' : '' ?>>
+                    <?= $block->escapeHtml(__('Enabled')) ?>
+                </option>
+            </select>
+            <p class="exx-help">
+                <?= $block->escapeHtml(__(
+                    'When enabled, each Magento customer’s group code is synced as an EXEMPTAX tag (for example, Wholesale → /Wholesale) for campaigns and automation filters.'
+                )) ?>
+            </p>
+        </div>
+    </div>
+
+    <div class="exx-confirm exemptax-settings-confirm" style="<?= $locked || $loadError ? 'display:none;' : '' ?>">
+        <input type="checkbox" id="exemptax_settings_confirm" />
+        <label for="exemptax_settings_confirm">
+            <?= $block->escapeHtml(__(
+                'I have reviewed the integration settings for syncing customer records between EXEMPTAX and Adobe Commerce.'
+            )) ?>
+        </label>
+    </div>
+
+    <div class="exx-actions">
+        <button type="button"
+                id="exemptax-settings-save"
+                class="action-default scalable save primary"
+                style="<?= $locked ? 'display:none;' : '' ?>"
+                disabled>
+            <span><?= $block->escapeHtml(__('Save Changes')) ?></span>
+        </button>
+        <button type="button"
+                id="exemptax-settings-refresh"
+                class="action-default scalable"
+                style="<?= $locked ? '' : 'display:none;' ?>">
+            <span><?= $block->escapeHtml(__('Refresh')) ?></span>
+        </button>
+        <span id="exemptax-settings-message" class="exx-message"></span>
+    </div>
+
+    <p class="exx-hint">
+        <?= $block->escapeHtml(__('Use Save Changes on this panel to update EXEMPTAX. The top Save Config button does not apply these settings.')) ?>
+    </p>
+</div>
+
+<script>
+require(['jquery', 'Magento_Ui/js/modal/alert'], function ($, uiAlert) {
+    'use strict';
+
+    var root = $('.exemptax-company-settings');
+    if (!root.length) {
+        return;
+    }
+
+    var statusUrl = root.data('status-url');
+    var saveUrl = root.data('save-url');
+    var formKey = root.data('form-key');
+    var $engine = $('#exemptax_tax_engine');
+    var $flag = $('#exemptax_tax_exempt_flag');
+    var $groups = $('#exemptax_ac_customer_groups');
+    var $syncTags = $('#exemptax_sync_customer_tags');
+    var $save = $('#exemptax-settings-save');
+    var $refresh = $('#exemptax-settings-refresh');
+    var $confirmWrap = root.find('.exemptax-settings-confirm');
+    var $confirm = $('#exemptax_settings_confirm');
+    var $locked = root.find('.exemptax-settings-locked');
+    var $lastSync = root.find('.exemptax-last-sync-value');
+    var $msg = $('#exemptax-settings-message');
+    var pollTimer = null;
+
+    function allGroupIds() {
+        return $groups.find('option').map(function () {
+            return String($(this).val());
+        }).get();
+    }
+
+    function applyCustomerGroups(selected) {
+        var allIds = allGroupIds();
+        if (!selected || !selected.length) {
+            $groups.val(allIds);
+            return;
+        }
+        $groups.val(selected.map(String));
+    }
+
+    function setMessage(text, isError) {
+        $msg.text(text || '');
+        $msg.css('color', isError ? '#e22626' : '#006400');
+    }
+
+    function formatLastSync(raw) {
+        if (!raw) {
+            return '<?= $block->escapeJs(__('Waiting for sync…')) ?>';
+        }
+        var d = new Date(raw);
+        if (isNaN(d.getTime())) {
+            return raw;
+        }
+        // Browser local timezone (machine time), not Magento admin / UTC.
+        return d.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+    }
+
+    function paintLastSync(raw) {
+        $lastSync.attr('data-raw', raw || '');
+        $lastSync.text(formatLastSync(raw));
+    }
+
+    function updateSaveEnabled() {
+        var locked = $engine.prop('disabled');
+        $save.prop('disabled', locked || !$confirm.is(':checked'));
+    }
+
+    function applyState(data) {
+        if (!data) {
+            return;
+        }
+        if (data.tax_engine) {
+            $engine.val(data.tax_engine);
+        }
+        if (typeof data.tax_exempt_flag !== 'undefined') {
+            $flag.val(String(data.tax_exempt_flag));
+        }
+        applyCustomerGroups(data.ac_customer_groups);
+        if (typeof data.sync_customer_tags !== 'undefined') {
+            $syncTags.val(String(Number(data.sync_customer_tags) ? 1 : 0));
+        }
+        var locked = !!data.locked;
+        $engine.prop('disabled', locked);
+        $flag.prop('disabled', locked);
+        $groups.prop('disabled', locked);
+        $syncTags.prop('disabled', locked);
+        $locked.toggle(locked);
+        $save.toggle(!locked);
+        $refresh.toggle(locked);
+        $confirmWrap.toggle(!locked);
+        if (locked) {
+            $confirm.prop('checked', false);
+            paintLastSync(null);
+            startPoll();
+        } else {
+            stopPoll();
+            paintLastSync(data.last_sync_at || null);
+        }
+        updateSaveEnabled();
+    }
+
+    function startPoll() {
+        if (pollTimer) {
+            return;
+        }
+        pollTimer = setInterval(function () {
+            refreshStatus(true);
+        }, 5000);
+    }
+
+    function stopPoll() {
+        if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+    }
+
+    function refreshStatus(silent) {
+        if (!silent) {
+            setMessage('<?= $block->escapeJs(__('Refreshing…')) ?>', false);
+        }
+        $.ajax({
+            url: statusUrl,
+            type: 'GET',
+            dataType: 'json',
+            data: { form_key: formKey }
+        }).done(function (resp) {
+            if (resp && resp.success) {
+                applyState(resp.data || {});
+                if (!silent) {
+                    setMessage(resp.message || '', false);
+                } else if (resp.data && !resp.data.locked) {
+                    setMessage('<?= $block->escapeJs(__('Sync complete. Settings unlocked.')) ?>', false);
+                    uiAlert({
+                        title: '<?= $block->escapeJs(__('EXEMPTAX')) ?>',
+                        content: '<?= $block->escapeJs(__('Sync complete. Integration settings are unlocked.')) ?>'
+                    });
+                }
+            } else if (!silent) {
+                setMessage((resp && resp.message) || '<?= $block->escapeJs(__('Could not refresh settings.')) ?>', true);
+            }
+        }).fail(function (xhr) {
+            if (!silent) {
+                var msg = (xhr.responseJSON && xhr.responseJSON.message) || '<?= $block->escapeJs(__('Could not refresh settings.')) ?>';
+                setMessage(msg, true);
+            }
+        });
+    }
+
+    $confirm.on('change', updateSaveEnabled);
+
+    $refresh.on('click', function (e) {
+        e.preventDefault();
+        refreshStatus(false);
+    });
+
+    $save.on('click', function (e) {
+        e.preventDefault();
+        if (!$confirm.is(':checked')) {
+            setMessage('<?= $block->escapeJs(__('Please confirm you have reviewed the settings.')) ?>', true);
+            return;
+        }
+        setMessage('<?= $block->escapeJs(__('Saving…')) ?>', false);
+        $save.prop('disabled', true);
+        $.ajax({
+            url: saveUrl,
+            type: 'POST',
+            dataType: 'json',
+            traditional: true,
+            data: {
+                form_key: formKey,
+                tax_engine: $engine.val(),
+                tax_exempt_flag: $flag.val(),
+                ac_customer_groups: $groups.val() || [],
+                sync_customer_tags: $syncTags.val()
+            }
+        }).done(function (resp) {
+            if (resp && resp.success) {
+                applyState(resp.data || {});
+                var msg = resp.message || '<?= $block->escapeJs(__('Settings saved.')) ?>';
+                setMessage(msg, false);
+                uiAlert({
+                    title: '<?= $block->escapeJs(__('EXEMPTAX')) ?>',
+                    content: msg
+                });
+            } else {
+                setMessage((resp && resp.message) || '<?= $block->escapeJs(__('Could not save settings.')) ?>', true);
+                if (resp && resp.data) {
+                    applyState(resp.data);
+                }
+            }
+        }).fail(function (xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) || '<?= $block->escapeJs(__('Could not save settings.')) ?>';
+            setMessage(msg, true);
+            if (xhr.responseJSON && xhr.responseJSON.data) {
+                applyState(xhr.responseJSON.data);
+            }
+            uiAlert({
+                title: '<?= $block->escapeJs(__('EXEMPTAX')) ?>',
+                content: msg
+            });
+        }).always(function () {
+            updateSaveEnabled();
+        });
+    });
+
+    // Initial paint in machine local time (server only sends UTC ISO).
+    paintLastSync($lastSync.attr('data-raw') || null);
+
+    updateSaveEnabled();
+    if (root.data('locked') === 1 || root.data('locked') === '1') {
+        startPoll();
+    }
+});
+</script>

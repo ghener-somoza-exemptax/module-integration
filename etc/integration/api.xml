@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<integrations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Integration:etc/integration.xsd">
+    <integration name="Exemptax">
+        <resources>
+            <resource name="Magento_Customer::customer"/>
+            <resource name="Magento_Customer::manage"/>
+            <resource name="Magento_Customer::group"/>
+            <resource name="Magento_Directory::directory"/>
+            <resource name="Exemptax_Integration::webhook_settings"/>
+        </resources>
+    </integration>
+</integrations>

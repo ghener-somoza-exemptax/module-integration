@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <fieldset name="customer">
+        <field name="exemptax_ecommerce_drop_url" formElement="input" sortOrder="1002">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">customer</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">EXEMPTAX Certificate Form URL</label>
+                <elementTmpl>Exemptax_Integration/form/element/link</elementTmpl>
+                <notice translate="true">Opens the EXEMPTAX tax-exemption certificate form for this customer.</notice>
+            </settings>
+        </field>
+    </fieldset>
+</form>

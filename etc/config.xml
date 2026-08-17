@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <exemptax_integration>
+            <general>
+                <enabled>0</enabled>
+                <webhook_url>https://app-api.exemptax.test/wbhk/adbcmmrc/event</webhook_url>
+                <settings_url></settings_url>
+                <ex_key></ex_key>
+                <verify_ssl>0</verify_ssl>
+                <apply_state_exemptions>1</apply_state_exemptions>
+                <ecommerce_drop_enabled>0</ecommerce_drop_enabled>
+                <ecommerce_drop_url></ecommerce_drop_url>
+                <tax_engine>magento</tax_engine>
+                <tax_exempt_flag>0</tax_exempt_flag>
+                <ac_customer_groups></ac_customer_groups>
+                <sync_customer_tags>0</sync_customer_tags>
+                <last_sync_at></last_sync_at>
+                <settings_locked>0</settings_locked>
+            </general>
+        </exemptax_integration>
+    </default>
+</config>

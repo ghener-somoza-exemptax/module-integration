@@ -1,0 +1,94 @@
+<?php
+/** @var \Exemptax\Integration\Block\Customer\EcommerceDropLink $block */
+if (!$block->isVisible()) {
+    return;
+}
+$url = $block->getEcommerceDropUrl();
+$label = $block->escapeHtml($block->getLinkLabel());
+$mode = (string) $block->getData('mode'); // popup|iframe|link
+?>
+<?php if ($mode === 'iframe'): ?>
+    <div class="exemptax-ecommerce-drop-iframe" style="margin: 1.5rem 0;">
+        <h2 class="legend"><?= $label ?></h2>
+        <iframe
+            title="<?= $label ?>"
+            src="<?= $block->escapeUrl($url) ?>"
+            allow="geolocation; microphone; camera"
+            allowfullscreen="true"
+            allowtransparency="true"
+            frameborder="0"
+            scrolling="auto"
+            style="min-width: 100%; height: 800px; overflow: auto; border: 0;"
+        ></iframe>
+    </div>
+<?php elseif ($mode === 'popup'): ?>
+    <div data-exemptax-footer-source hidden>
+        <ul>
+            <li>
+                <a href="#"
+                   onclick="window.open(
+                       '<?= $block->escapeJs($url) ?>',
+                       'exemptionRequest',
+                       'left=50,top=100,width=1000,height=600,menubar=0,toolbar=0,location=0,status=0'
+                   ); return false;">
+                    <?= $label ?> (<?= $block->escapeHtml(__('Popup')) ?>)
+                </a>
+            </li>
+            <li>
+                <a href="<?= $block->escapeUrl($url) ?>" target="_blank" rel="noopener noreferrer">
+                    <?= $label ?> (<?= $block->escapeHtml(__('New Tab')) ?>)
+                </a>
+            </li>
+        </ul>
+    </div>
+    <script>
+        (function () {
+            function placeExemptaxFooterLinks() {
+                var source = document.querySelector('[data-exemptax-footer-source]');
+                var list = document.querySelector('.page-footer .footer.content > .links ul');
+                if (!source || !list) {
+                    return;
+                }
+                source.querySelectorAll('li').forEach(function (item) {
+                    list.appendChild(item);
+                });
+                source.remove();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', placeExemptaxFooterLinks);
+            } else {
+                placeExemptaxFooterLinks();
+            }
+        })();
+    </script>
+<?php else: ?>
+    <div data-exemptax-footer-source hidden>
+        <ul>
+            <li>
+                <a href="<?= $block->escapeUrl($url) ?>" target="_blank" rel="noopener noreferrer">
+                    <?= $label ?>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <script>
+        (function () {
+            function placeExemptaxFooterLink() {
+                var source = document.querySelector('[data-exemptax-footer-source]');
+                var list = document.querySelector('.page-footer .footer.content > .links ul');
+                if (!source || !list) {
+                    return;
+                }
+                source.querySelectorAll('li').forEach(function (item) {
+                    list.appendChild(item);
+                });
+                source.remove();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', placeExemptaxFooterLink);
+            } else {
+                placeExemptaxFooterLink();
+            }
+        })();
+    </script>
+<?php endif; ?>

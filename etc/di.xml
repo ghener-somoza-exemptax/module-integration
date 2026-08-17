@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Exemptax\Integration\Api\WebhookSettingsManagementInterface"
+                type="Exemptax\Integration\Model\WebhookSettingsManagement"/>
+    <preference for="Magento\Integration\Api\OauthServiceInterface"
+                type="Exemptax\Integration\Model\OauthService"/>
+    <type name="Magento\Customer\Api\CustomerRepositoryInterface">
+        <plugin name="exemptax_integration_sync_taxjar_customer_exemption"
+                type="Exemptax\Integration\Plugin\Customer\SyncTaxJarCustomerExemption"
+                sortOrder="100"/>
+    </type>
+    <type name="Magento\Customer\Model\Customer\DataProviderWithDefaultAddresses">
+        <plugin name="exemptax_integration_customer_ecommerce_drop"
+                type="Exemptax\Integration\Plugin\Customer\EcommerceDropFormPlugin"
+                sortOrder="10"/>
+    </type>
+</config>

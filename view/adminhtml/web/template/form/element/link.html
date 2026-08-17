@@ -1,0 +1,16 @@
+<!--
+/**
+ * One-line truncated ecommerce-drop URL. Full URL is on hover and used as the href.
+ */
+-->
+<a class="admin__field-value"
+   target="_blank"
+   rel="noopener noreferrer"
+   style="display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#303030;"
+   data-bind="
+    visible: value,
+    attr: {href: value, id: uid, title: value},
+    text: value">
+</a>
+<span class="admin__field-value"
+      data-bind="visible: !value(), i18n: 'Not configured'"></span>
