@@ -7,7 +7,7 @@ Local Magento 2 / Mage-OS module that:
 
 ## Client setup (no Marketplace)
 
-Clients install this module themselves, then paste the EXEMPTAX OAuth URLs on Magento **System → Extensions → Integrations**. They do **not** paste Webhook URL / Settings URL / ex-key by hand — those are pushed after Activate.
+Clients install this module themselves, then **Activate** the EXEMPTAX integration in Magento Admin. They do **not** paste Callback URL, Identity Link URL, Webhook URL, Settings URL, or ex-key by hand — OAuth URLs are pre-filled on install, and the rest are pushed after Activate.
 
 ### 1. Install the module
 
@@ -19,32 +19,23 @@ bin/magento setup:upgrade
 bin/magento cache:flush
 ```
 
-`setup:upgrade` creates a Magento Integration named **Exemptax** with the API resources this connection needs.
+`setup:upgrade` creates a Magento Integration named **EXEMPTAX** with production OAuth URLs pre-filled:
 
-### 2. Paste URLs in System → Integrations → Exemptax
+- **Callback URL:** `https://app.exemptax.com/adobe_commerce/oauth/callback`
+- **Identity Link URL:** `https://app.exemptax.com/adobe_commerce/app`
 
-**System → Extensions → Integrations → Exemptax → Edit**
+### 2. Activate
 
-| Magento field | What to paste (from EXEMPTAX) |
-|---|---|
-| **Callback URL** | OAuth callback EXEMPTAX gives the merchant |
-| **Identity Link URL** | Connect wizard EXEMPTAX gives the merchant |
+**System → Extensions → Integrations → EXEMPTAX → Activate**
 
-Example (DEV):
+Callback and Identity Link URLs are already filled with production defaults. Magento opens the Identity Link popup → merchant logs into EXEMPTAX → picks company → tax engine / exemption automation → **Connect & Sync**.
 
-- Callback URL: `https://a-dvlp-01.exemptax.com/api/v1/adobe_commerce/oauth/callback`
-- Identity Link URL: `https://a-dvlp-01.exemptax.com/api/v1/adobe_commerce/app`
+If this Magento store connects to **DEV** or **local Herd** instead of production, replace the two URLs in that integration before Activate:
 
-Example (local Herd):
+- **DEV:** `https://a-dvlp-01.exemptax.com/api/v1/adobe_commerce/oauth/callback` and `.../app`
+- **Local Herd:** `https://app-api.exemptax.test/adobe_commerce/oauth/callback` and `https://app.exemptax.test/adobe_commerce/app`
 
-- Callback URL: `https://app-api.exemptax.test/adobe_commerce/oauth/callback`
-- Identity Link URL: `https://app.exemptax.test/adobe_commerce/app`
-
-Leave **API** resources as pre-selected (Customers, Customer Groups, Directory, EXEMPTAX Webhook Settings). Save.
-
-### 3. Activate
-
-**Activate** → Magento opens the Identity Link popup → merchant logs into EXEMPTAX → picks company → tax engine / exemption automation → **Connect & Sync**.
+Leave **API** resources as pre-selected (Customers, Customer Groups, Directory, EXEMPTAX Webhook Settings).
 
 After that, EXEMPTAX pushes Webhook URL, Settings URL, ex-key, and related config into **Stores → Configuration → EXEMPTAX**. Merchants can later change sync settings there without opening EXEMPTAX.
 
@@ -193,8 +184,21 @@ On Exemptax connect / Sync, these are **auto-pushed** via `PUT /V1/exemptax/inte
 Then `bin/magento cache:flush` if you change values by hand.
 
 ### What the module renders
+- **Storefront page** `/tax-exempt-certificates`: CMS page with merchant-editable copy + iframe of ecommerce-drop
 - **My Account** dashboard: iframe of ecommerce-drop
-- **Footer** (logged-in only): popup link “Tax-Exempt Certificates”
+- **Footer** (logged-in only): “Tax-Exempt Certificates” link to the storefront page, plus a “(Popup)” link that opens ecommerce-drop directly
+
+### Storefront page (`/tax-exempt-certificates`)
+
+Mirrors the Shopify `tax-exempt-customers` page: a store-owned URL whose copy is CMS content, wrapping an iframe of the same ecommerce-drop app.
+
+- Created on `setup:upgrade` by `Setup\Patch\Data\CreateCertificatesCmsPage`. The patch **skips** if a page with that URL key already exists, so merchant edits are never overwritten.
+- Copy is editable in **Content → Pages → Tax Exempt Certificates**. Deleting the page does not break anything except the footer link target.
+- The iframe is injected by `view/frontend/layout/cms_page_view_id_tax-exempt-certificates.xml`, marked `cacheable="false"` because the iframe `src` embeds `customer_id` and `email`. The handle is derived from the page URL key (Magento only converts `/` to `_`, so hyphens are kept).
+- Logged-out visitors see the CMS copy plus a “Sign In” prompt instead of the iframe.
+- The page is `NOINDEX,NOFOLLOW`; it is only useful to logged-in customers.
+
+**Renaming the URL key:** change it under **Content → Pages**, then set **Stores → Configuration → EXEMPTAX → Integration → Certificates page URL key** (`exemptax_integration/general/certificates_page_identifier`) to match so the footer link follows, and rename the layout file to `cms_page_view_id_<new-key>.xml` so the iframe still injects.
 
 ### Manual theme snippet (optional / Shopify-style)
 Popup footer link:
@@ -230,7 +234,7 @@ TaxJar allows **one** `exemption_type` per customer. Phase 2.1 makes that explic
 | EXEMPTAX | TaxJar |
 |---|---|
 | Resale (`G`) | Wholesale |
-| Federal Government (`A`) | Government |
+| Government — federal (`A`), state (`B`), tribal (`C`) | Government |
 | Everything else | Other |
 | Taxable / no coverage | Non-Exempt |
 
@@ -239,4 +243,4 @@ TaxJar allows **one** `exemption_type` per customer. Phase 2.1 makes that explic
 - BE: `AdobeCommerceService::mapExemptaxReasonToTaxJarType()` + `updateCustomerExemptionAttributes()` writes Magento attr + `tj_exemption_type` / `tj_regions` when `tax_engine=taxjar`.
 - Existing TaxJar cloud sync plugin still applies on Magento customer save.
 - Regions still control *where* checkout is $0; type is classification for TaxJar calc/reporting.
-- Note: Chargebee’s shared `convertExemptionReasonTaxjar()` still maps A/B/C → government; Adobe Phase 2.1 follows Federal-only per table above.
+- Note: the reason→type rules match Chargebee’s shared `convertExemptionReasonTaxjar()`. Adobe keeps its own mapper because it must also emit `non_exempt` and tolerate a null/lowercase reason id.

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+    Handle for the CMS page created by CreateCertificatesCmsPage. Magento derives it
+    from the page identifier and only converts "/" to "_", so hyphens are kept.
+    Rename this file to match if the merchant changes the page URL key.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <meta name="robots" content="NOINDEX,NOFOLLOW"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <!-- Not cacheable: the iframe src carries the logged-in customer's id and email. -->
+            <block class="Exemptax\Integration\Block\Customer\EcommerceDropLink"
+                   name="exemptax.certificates.page"
+                   template="Exemptax_Integration::customer/ecommerce_drop_link.phtml"
+                   cacheable="false">
+                <arguments>
+                    <argument name="mode" xsi:type="string">iframe</argument>
+                    <argument name="show_heading" xsi:type="boolean">false</argument>
+                    <argument name="link_label" xsi:type="string" translate="true">Tax-Exempt Certificates</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

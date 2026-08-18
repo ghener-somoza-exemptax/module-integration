@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Exemptax\Integration\Setup\Patch\Data;
 
+use Exemptax\Integration\Model\Config;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Integration\Api\IntegrationServiceInterface;
 use Magento\Integration\Model\Integration;
 
 /**
  * Creates System → Extensions → Integrations → EXEMPTAX on module install.
- * Uses a manual integration so merchants can paste env-specific Callback and Identity Link URLs.
+ * Pre-fills production Callback and Identity Link URLs; merchants on other
+ * environments can replace them in Admin before Activate.
  */
 class CreateExemptaxIntegration implements DataPatchInterface
 {
@@ -31,6 +33,8 @@ class CreateExemptaxIntegration implements DataPatchInterface
         $this->integrationService->create([
             Integration::NAME => self::INTEGRATION_NAME,
             Integration::EMAIL => 'support@exemptax.com',
+            Integration::ENDPOINT => Config::DEFAULT_OAUTH_CALLBACK_URL,
+            Integration::IDENTITY_LINK_URL => Config::DEFAULT_IDENTITY_LINK_URL,
             Integration::SETUP_TYPE => Integration::TYPE_MANUAL,
             Integration::STATUS => Integration::STATUS_INACTIVE,
             'resource' => [

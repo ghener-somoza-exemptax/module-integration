@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Exemptax\Integration\Test\Unit\Setup\Patch\Data;
 
+use Exemptax\Integration\Model\Config;
 use Exemptax\Integration\Setup\Patch\Data\CreateExemptaxIntegration;
 use Magento\Integration\Api\IntegrationServiceInterface;
 use Magento\Integration\Model\Integration;
@@ -34,6 +35,8 @@ class CreateExemptaxIntegrationTest extends TestCase
             ->with($this->callback(function (array $data): bool {
                 return $data[Integration::NAME] === 'EXEMPTAX'
                     && $data[Integration::EMAIL] === 'support@exemptax.com'
+                    && $data[Integration::ENDPOINT] === Config::DEFAULT_OAUTH_CALLBACK_URL
+                    && $data[Integration::IDENTITY_LINK_URL] === Config::DEFAULT_IDENTITY_LINK_URL
                     && (int) $data[Integration::SETUP_TYPE] === Integration::TYPE_MANUAL
                     && (int) $data[Integration::STATUS] === Integration::STATUS_INACTIVE
                     && in_array('Magento_Customer::customer', $data['resource'], true);
