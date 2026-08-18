@@ -62,9 +62,9 @@
                     <validate>validate-url</validate>
                 </field>
                 <field id="certificates_page_identifier" translate="label comment" type="text" sortOrder="80"
-                       showInDefault="1" showInWebsite="1" showInStore="0">
+                       showInDefault="0" showInWebsite="0" showInStore="0">
                     <label>Certificates page URL key</label>
-                    <comment>URL key of the storefront CMS page that shows the customer's tax-exempt certificates. Update this if you rename the page under Content &gt; Pages, so the footer link keeps pointing at it.</comment>
+                    <comment>URL key of the storefront CMS page that shows the customer's tax-exempt certificates. Defaults to tax-exempt-certificates.</comment>
                 </field>
             </group>
         </section>

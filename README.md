@@ -198,7 +198,7 @@ Mirrors the Shopify `tax-exempt-customers` page: a store-owned URL whose copy is
 - Logged-out visitors see the CMS copy plus a “Sign In” prompt instead of the iframe.
 - The page is `NOINDEX,NOFOLLOW`; it is only useful to logged-in customers.
 
-**Renaming the URL key:** change it under **Content → Pages**, then set **Stores → Configuration → EXEMPTAX → Integration → Certificates page URL key** (`exemptax_integration/general/certificates_page_identifier`) to match so the footer link follows, and rename the layout file to `cms_page_view_id_<new-key>.xml` so the iframe still injects.
+The storefront URL key defaults to `tax-exempt-certificates` (`exemptax_integration/general/certificates_page_identifier`). It is not shown in Admin. Renaming the CMS page also requires updating that config path and renaming `cms_page_view_id_tax-exempt-certificates.xml`.
 
 ### Manual theme snippet (optional / Shopify-style)
 Popup footer link:
