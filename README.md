@@ -186,7 +186,7 @@ Then `bin/magento cache:flush` if you change values by hand.
 ### What the module renders
 - **Storefront page** `/tax-exempt-certificates`: CMS page with merchant-editable copy + iframe of ecommerce-drop
 - **My Account** dashboard: iframe of ecommerce-drop
-- **Footer** (logged-in only): “Tax-Exempt Certificates” link to the storefront page, plus a “(Popup)” link that opens ecommerce-drop directly
+- **Footer** (logged-in only): “Tax-Exempt Certificates (New Tab)” opens `/tax-exempt-certificates` in a new tab; “(Popup)” opens ecommerce-drop directly
 
 ### Storefront page (`/tax-exempt-certificates`)
 

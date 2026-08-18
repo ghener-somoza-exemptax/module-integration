@@ -29,8 +29,10 @@ $label = $block->escapeHtml($block->getLinkLabel());
         </div>
     <?php elseif ($mode === 'popup'): ?>
         <li class="nav item">
-            <a href="<?= $block->escapeUrl($block->getCertificatesPageUrl()) ?>">
-                <?= $label ?>
+            <a href="<?= $block->escapeUrl($block->getCertificatesPageUrl()) ?>"
+               target="_blank"
+               rel="noopener noreferrer">
+                <?= $label ?> (<?= $block->escapeHtml(__('New Tab')) ?>)
             </a>
         </li>
         <li class="nav item">
