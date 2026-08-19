@@ -21,8 +21,8 @@ bin/magento cache:flush
 
 `setup:upgrade` creates a Magento Integration named **EXEMPTAX** with production OAuth URLs pre-filled:
 
-- **Callback URL:** `https://app.exemptax.com/adobe_commerce/oauth/callback`
-- **Identity Link URL:** `https://app.exemptax.com/adobe_commerce/app`
+- **Callback URL:** `https://app.exemptax.com/api/v1/adobe_commerce/oauth/callback`
+- **Identity Link URL:** `https://app.exemptax.com/api/v1/adobe_commerce/app`
 
 ### 2. Activate
 

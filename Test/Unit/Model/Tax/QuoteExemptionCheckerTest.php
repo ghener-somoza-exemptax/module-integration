@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Exemptax\Integration\Test\Unit\Model\Tax;
 
 use Exemptax\Integration\Model\Config;
+use Exemptax\Integration\Model\Customer\Attribute\Source\ExemptionStatus;
 use Exemptax\Integration\Model\Tax\ExemptionStates;
 use Exemptax\Integration\Model\Tax\QuoteExemptionChecker;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -26,6 +27,7 @@ class QuoteExemptionCheckerTest extends TestCase
     {
         parent::setUp();
         if (!interface_exists(CustomerRepositoryInterface::class)
+            || !interface_exists(AttributeValueInterface::class)
             || !class_exists(Quote::class)
             || !class_exists(Address::class)
         ) {
@@ -78,16 +80,59 @@ class QuoteExemptionCheckerTest extends TestCase
         $this->assertFalse($checker->shouldExemptQuote($quote, $assignment));
     }
 
-    private function makeChecker(string $statesCsv, bool $enabled): QuoteExemptionChecker
+    public function test_legacy_exempts_unmatched_us_state_when_status_active(): void
     {
+        $checker = $this->makeChecker('CA', enabled: true, grandfathered: true, status: 'active');
+        $quote = $this->quoteWithCustomer(7);
+        $assignment = $this->shippingAssignment('US', 'TX');
+
+        $this->assertTrue($checker->shouldExemptQuote($quote, $assignment));
+    }
+
+    public function test_legacy_does_not_exempt_when_status_is_not_active(): void
+    {
+        $checker = $this->makeChecker('CA', enabled: true, grandfathered: true, status: '');
+        $quote = $this->quoteWithCustomer(7);
+        $assignment = $this->shippingAssignment('US', 'CA');
+
+        $this->assertFalse($checker->shouldExemptQuote($quote, $assignment));
+    }
+
+    public function test_legacy_does_not_exempt_non_us_even_when_status_active(): void
+    {
+        $checker = $this->makeChecker('CA', enabled: true, grandfathered: true, status: 'active');
+        $quote = $this->quoteWithCustomer(7);
+        $assignment = $this->shippingAssignment('CA', 'ON');
+
+        $this->assertFalse($checker->shouldExemptQuote($quote, $assignment));
+    }
+
+    private function makeChecker(
+        string $statesCsv,
+        bool $enabled,
+        bool $grandfathered = false,
+        string $status = 'active'
+    ): QuoteExemptionChecker {
         $config = $this->createMock(Config::class);
         $config->method('isStateExemptionEnabled')->willReturn($enabled);
+        $config->method('isGrandfatheredEntireExemptionEnabled')->willReturn($grandfathered);
 
-        $attribute = $this->createMock(AttributeValueInterface::class);
-        $attribute->method('getValue')->willReturn($statesCsv);
+        $statesAttribute = $this->createMock(AttributeValueInterface::class);
+        $statesAttribute->method('getValue')->willReturn($statesCsv);
+
+        $statusAttribute = $this->createMock(AttributeValueInterface::class);
+        $statusAttribute->method('getValue')->willReturn($status);
 
         $customer = $this->createMock(CustomerInterface::class);
-        $customer->method('getCustomAttribute')->with(ExemptionStates::ATTRIBUTE_CODE)->willReturn($attribute);
+        $customer->method('getCustomAttribute')->willReturnCallback(
+            static function (string $code) use ($statesAttribute, $statusAttribute) {
+                return match ($code) {
+                    ExemptionStates::ATTRIBUTE_CODE => $statesAttribute,
+                    ExemptionStatus::ATTRIBUTE_CODE => $statusAttribute,
+                    default => null,
+                };
+            }
+        );
 
         $customerRepository = $this->createMock(CustomerRepositoryInterface::class);
         $customerRepository->method('getById')->willReturn($customer);

@@ -15,4 +15,9 @@
                 type="Exemptax\Integration\Plugin\Customer\EcommerceDropFormPlugin"
                 sortOrder="10"/>
     </type>
+    <type name="Magento\Integration\Api\IntegrationServiceInterface">
+        <plugin name="exemptax_integration_notify_on_delete"
+                type="Exemptax\Integration\Plugin\Integration\NotifyExemptaxOnDelete"
+                sortOrder="10"/>
+    </type>
 </config>

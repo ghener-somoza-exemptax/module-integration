@@ -31,7 +31,11 @@ class Save extends Action
 
         $taxEngine = (string) $this->getRequest()->getParam('tax_engine', '');
         $taxExemptFlag = (int) $this->getRequest()->getParam('tax_exempt_flag', -1);
+        if ($taxExemptFlag === 3) {
+            $taxExemptFlag = 2;
+        }
         $syncCustomerTags = (int) $this->getRequest()->getParam('sync_customer_tags', 0);
+        $grandfatheredEntireExemption = (int) $this->getRequest()->getParam('grandfathered_entire_exemption', 0);
         $customerGroups = $this->getRequest()->getParam('ac_customer_groups', []);
         if (!is_array($customerGroups)) {
             $customerGroups = [];
@@ -44,12 +48,13 @@ class Save extends Action
 
         if (
             !in_array($taxEngine, ['magento', 'taxjar'], true)
-            || !in_array($taxExemptFlag, [0, 1, 2, 3], true)
+            || !in_array($taxExemptFlag, [0, 1, 2], true)
             || !in_array($syncCustomerTags, [0, 1], true)
+            || !in_array($grandfatheredEntireExemption, [0, 1], true)
         ) {
             return $result->setHttpResponseCode(422)->setData([
                 'success' => false,
-                'message' => (string) __('Invalid tax engine, exemption automation, or sync tags value.'),
+                'message' => (string) __('Invalid tax engine, exemption automation, legacy exemption, or sync tags value.'),
             ]);
         }
 
@@ -68,6 +73,7 @@ class Save extends Action
                 'tax_exempt_flag' => $taxExemptFlag,
                 'ac_customer_groups' => $customerGroups,
                 'sync_customer_tags' => $syncCustomerTags,
+                'grandfathered_entire_exemption' => $grandfatheredEntireExemption,
             ]);
             $this->webhookSettings->persistCompanySettings($data);
 

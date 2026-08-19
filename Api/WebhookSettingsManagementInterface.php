@@ -26,6 +26,7 @@ interface WebhookSettingsManagementInterface
      * @param string|null $lastSyncAt Optional ISO timestamp from EXEMPTAX
      * @param bool|null $settingsLocked Optional sync-lock flag
      * @param string|null $settingsUrl Optional Laravel HMAC settings API URL
+     * @param bool|null $grandfatheredEntireExemption Optional all-US vs certificate-state exemption
      * @return mixed[]
      */
     public function save(
@@ -42,7 +43,8 @@ interface WebhookSettingsManagementInterface
         ?int $syncCustomerTags = null,
         ?string $lastSyncAt = null,
         ?bool $settingsLocked = null,
-        ?string $settingsUrl = null
+        ?string $settingsUrl = null,
+        ?bool $grandfatheredEntireExemption = null
     ): array;
 
     /**

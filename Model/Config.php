@@ -22,16 +22,25 @@ class Config
     public const XML_PATH_TAX_EXEMPT_FLAG = 'exemptax_integration/general/tax_exempt_flag';
     public const XML_PATH_AC_CUSTOMER_GROUPS = 'exemptax_integration/general/ac_customer_groups';
     public const XML_PATH_SYNC_CUSTOMER_TAGS = 'exemptax_integration/general/sync_customer_tags';
+    public const XML_PATH_GRANDFATHERED_ENTIRE_EXEMPTION = 'exemptax_integration/general/grandfathered_entire_exemption';
     public const XML_PATH_LAST_SYNC_AT = 'exemptax_integration/general/last_sync_at';
     public const XML_PATH_SETTINGS_LOCKED = 'exemptax_integration/general/settings_locked';
 
     /** Fallback when the merchant blanks out the storefront page URL key. */
     public const DEFAULT_CERTIFICATES_PAGE_IDENTIFIER = 'tax-exempt-certificates';
 
-    /** Production OAuth URLs pre-filled on the Magento Integration record. */
-    public const DEFAULT_OAUTH_CALLBACK_URL = 'https://app.exemptax.com/adobe_commerce/oauth/callback';
+    /**
+     * Production OAuth URLs pre-filled on the Magento Integration record.
+     * Same /api/v1 gateway prefix as DEV (a-dvlp-01) and Magento webhooks.
+     */
+    public const DEFAULT_OAUTH_CALLBACK_URL = 'https://app.exemptax.com/api/v1/adobe_commerce/oauth/callback';
 
-    public const DEFAULT_IDENTITY_LINK_URL = 'https://app.exemptax.com/adobe_commerce/app';
+    public const DEFAULT_IDENTITY_LINK_URL = 'https://app.exemptax.com/api/v1/adobe_commerce/app';
+
+    /** Pre-1.0.6 production URLs (no gateway prefix). Migrated by data patch. */
+    public const LEGACY_OAUTH_CALLBACK_URL = 'https://app.exemptax.com/adobe_commerce/oauth/callback';
+
+    public const LEGACY_IDENTITY_LINK_URL = 'https://app.exemptax.com/adobe_commerce/app';
 
     /** Header Exemptax BE sends on Magento REST writes so webhooks are not echoed. */
     public const HEADER_ORIGIN = 'X-Exemptax-Origin';
@@ -131,6 +140,19 @@ class Config
         return '';
     }
 
+    /**
+     * Same HMAC settings API as Admin save; Magento Curl POSTs here on OAuth integration delete.
+     */
+    public function getDisconnectUrl(?int $websiteId = null): string
+    {
+        $settings = rtrim($this->getSettingsUrl($websiteId), '/');
+        if ($settings === '') {
+            return '';
+        }
+
+        return $settings . '/disconnect';
+    }
+
     public function getExKey(?int $websiteId = null): string
     {
         // Must be the exact Laravel encrypt(company_id) string sent as the ex-key header.
@@ -175,8 +197,11 @@ class Config
             ScopeInterface::SCOPE_WEBSITE,
             $websiteId
         );
+        if ($flag === 3) {
+            return 2;
+        }
 
-        return in_array($flag, [0, 1, 2, 3], true) ? $flag : 0;
+        return in_array($flag, [0, 1, 2], true) ? $flag : 0;
     }
 
     /**
@@ -211,6 +236,20 @@ class Config
             ScopeInterface::SCOPE_WEBSITE,
             $websiteId
         ) ? 1 : 0;
+    }
+
+    public function isGrandfatheredEntireExemptionEnabled(?int $websiteId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_GRANDFATHERED_ENTIRE_EXEMPTION,
+            ScopeInterface::SCOPE_WEBSITE,
+            $websiteId
+        );
+    }
+
+    public function getGrandfatheredEntireExemption(?int $websiteId = null): int
+    {
+        return $this->isGrandfatheredEntireExemptionEnabled($websiteId) ? 1 : 0;
     }
 
     public function getLastSyncAt(?int $websiteId = null): ?string
@@ -257,6 +296,7 @@ class Config
             'tax_exempt_flag' => $this->getTaxExemptFlag($websiteId),
             'ac_customer_groups' => $this->getAcCustomerGroups($websiteId),
             'sync_customer_tags' => $this->getSyncCustomerTags($websiteId),
+            'grandfathered_entire_exemption' => $this->getGrandfatheredEntireExemption($websiteId),
             'last_sync_at' => $locked ? null : $lastSync,
             'locked' => $locked,
             'needs_reauth' => false,

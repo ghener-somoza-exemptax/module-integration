@@ -194,7 +194,6 @@ class CompanySettings extends Field
             ['value' => 0, 'label' => (string) __('Do not update')],
             ['value' => 1, 'label' => (string) __('Exempt with pending certificate (customer friendly)')],
             ['value' => 2, 'label' => (string) __('Exempt with active certificate (business friendly)')],
-            ['value' => 3, 'label' => (string) __('Exempt with active certificate in exposure state (business friendly strict)')],
         ];
     }
 }

@@ -34,7 +34,8 @@ class WebhookSettingsManagement implements WebhookSettingsManagementInterface
         ?int $syncCustomerTags = null,
         ?string $lastSyncAt = null,
         ?bool $settingsLocked = null,
-        ?string $settingsUrl = null
+        ?string $settingsUrl = null,
+        ?bool $grandfatheredEntireExemption = null
     ): array {
         $webhookUrl = trim($webhookUrl);
         $exKey = trim($exKey);
@@ -125,6 +126,13 @@ class WebhookSettingsManagement implements WebhookSettingsManagementInterface
             $this->configWriter->save(Config::XML_PATH_SETTINGS_URL, $settingsUrl);
         }
 
+        if ($grandfatheredEntireExemption !== null) {
+            $this->configWriter->save(
+                Config::XML_PATH_GRANDFATHERED_ENTIRE_EXEMPTION,
+                $grandfatheredEntireExemption ? '1' : '0'
+            );
+        }
+
         $this->cacheTypeList->cleanType('config');
         $this->reinitableConfig->reinit();
 
@@ -183,7 +191,10 @@ class WebhookSettingsManagement implements WebhookSettingsManagementInterface
         }
         if (array_key_exists('tax_exempt_flag', $data)) {
             $flag = (int) $data['tax_exempt_flag'];
-            if (in_array($flag, [0, 1, 2, 3], true)) {
+            if ($flag === 3) {
+                $flag = 2;
+            }
+            if (in_array($flag, [0, 1, 2], true)) {
                 $this->configWriter->save(Config::XML_PATH_TAX_EXEMPT_FLAG, (string) $flag);
             }
         }
@@ -200,6 +211,12 @@ class WebhookSettingsManagement implements WebhookSettingsManagementInterface
                 ((int) $data['sync_customer_tags']) ? '1' : '0'
             );
         }
+        if (array_key_exists('grandfathered_entire_exemption', $data)) {
+            $this->configWriter->save(
+                Config::XML_PATH_GRANDFATHERED_ENTIRE_EXEMPTION,
+                ((int) $data['grandfathered_entire_exemption']) ? '1' : '0'
+            );
+        }
         if (array_key_exists('last_sync_at', $data)) {
             $this->configWriter->save(Config::XML_PATH_LAST_SYNC_AT, (string) ($data['last_sync_at'] ?? ''));
         }
@@ -210,6 +227,18 @@ class WebhookSettingsManagement implements WebhookSettingsManagementInterface
             );
         }
 
+        $this->cacheTypeList->cleanType('config');
+        $this->reinitableConfig->reinit();
+    }
+
+    /**
+     * Turn off outbound webhooks and Magento-side exemption/UI flags after OAuth delete.
+     */
+    public function disableLocalIntegration(): void
+    {
+        $this->configWriter->save(Config::XML_PATH_ENABLED, '0');
+        $this->configWriter->save(Config::XML_PATH_STATE_EXEMPTION, '0');
+        $this->configWriter->save(Config::XML_PATH_ECOMMERCE_DROP_ENABLED, '0');
         $this->cacheTypeList->cleanType('config');
         $this->reinitableConfig->reinit();
     }

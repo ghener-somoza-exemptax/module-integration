@@ -10,7 +10,7 @@ use Magento\Framework\Serialize\Serializer\Json;
 use Psr\Log\LoggerInterface;
 
 /**
- * Live GET/PUT of EXEMPTAX Adobe Commerce company settings (HMAC auth).
+ * Live GET/PUT/disconnect of EXEMPTAX Adobe Commerce company settings (HMAC auth).
  */
 class Client
 {
@@ -31,7 +31,7 @@ class Client
     }
 
     /**
-     * @param array{tax_engine: string, tax_exempt_flag: int} $payload
+     * @param array<string, mixed> $payload
      * @return array<string, mixed>
      */
     public function putSettings(array $payload, ?int $websiteId = null): array
@@ -39,6 +39,16 @@ class Client
         $body = $this->json->serialize($payload);
 
         return $this->request('PUT', $body, $payload, $websiteId);
+    }
+
+    /**
+     * Notify EXEMPTAX that Magento deleted the OAuth integration (HMAC POST to /settings/disconnect).
+     *
+     * @return array<string, mixed>
+     */
+    public function deleteSettings(?int $websiteId = null): array
+    {
+        return $this->request('DELETE', '{}', ['disconnected' => true], $websiteId);
     }
 
     /**
@@ -53,7 +63,9 @@ class Client
             );
         }
 
-        $url = $this->config->getSettingsUrl($websiteId);
+        $url = $method === 'DELETE'
+            ? $this->config->getDisconnectUrl($websiteId)
+            : $this->config->getSettingsUrl($websiteId);
         $exKey = $this->config->getExKey($websiteId);
         $curl = $this->curlFactory->create();
 
@@ -74,7 +86,8 @@ class Client
             if ($method === 'GET') {
                 $curl->get($url);
             } else {
-                // Magento Curl::post() forces POST; BE accepts POST|PUT for settings update.
+                // Magento Curl::post() forces POST; BE accepts POST|PUT for settings update
+                // and POST|DELETE for /settings/disconnect.
                 $curl->setOption(CURLOPT_POST, true);
                 $curl->setOption(CURLOPT_POSTFIELDS, $body);
                 $curl->setOption(CURLOPT_CUSTOMREQUEST, 'POST');

@@ -18,6 +18,8 @@ class ExemptionStatus extends AbstractSource
 
     public const VALUE_INACTIVE = '';
 
+    public const ATTRIBUTE_CODE = 'exemptax_exemption_status';
+
     /**
      * @return list<array{value: string, label: \Magento\Framework\Phrase}>
      */

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Exemptax\Integration\Model\Tax;
 
 use Exemptax\Integration\Model\Config;
+use Exemptax\Integration\Model\Customer\Attribute\Source\ExemptionStatus;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Directory\Model\RegionFactory;
 use Magento\Quote\Api\Data\ShippingAssignmentInterface;
@@ -17,8 +18,8 @@ use Psr\Log\LoggerInterface;
  */
 class QuoteExemptionChecker
 {
-    /** @var array<int, list<string>> */
-    private array $customerStatesCache = [];
+    /** @var array<int, array{states: list<string>, status: string}> */
+    private array $customerExemptionCache = [];
 
     public function __construct(
         private readonly Config $config,
@@ -55,39 +56,50 @@ class QuoteExemptionChecker
             return false;
         }
 
-        $regionCode = $this->resolveRegionCode($address);
-        $states = $this->getCustomerExemptionStates($customerId);
+        $exemption = $this->getCustomerExemption($customerId);
 
-        return $this->exemptionStates->contains($states, $regionCode);
+        if ($this->config->isGrandfatheredEntireExemptionEnabled($websiteId)) {
+            return $exemption['status'] === ExemptionStatus::VALUE_ACTIVE;
+        }
+
+        $regionCode = $this->resolveRegionCode($address);
+
+        return $this->exemptionStates->contains($exemption['states'], $regionCode);
     }
 
     /**
-     * @return list<string>
+     * @return array{states: list<string>, status: string}
      */
-    private function getCustomerExemptionStates(int $customerId): array
+    private function getCustomerExemption(int $customerId): array
     {
-        if (isset($this->customerStatesCache[$customerId])) {
-            return $this->customerStatesCache[$customerId];
+        if (isset($this->customerExemptionCache[$customerId])) {
+            return $this->customerExemptionCache[$customerId];
         }
 
+        $states = [];
+        $status = '';
         try {
             $customer = $this->customerRepository->getById($customerId);
-            $attribute = $customer->getCustomAttribute(ExemptionStates::ATTRIBUTE_CODE);
-            $raw = $attribute?->getValue();
+            $statesAttribute = $customer->getCustomAttribute(ExemptionStates::ATTRIBUTE_CODE);
+            $raw = $statesAttribute?->getValue();
             $states = $this->exemptionStates->parse(
                 is_array($raw) || is_string($raw) || $raw === null ? $raw : (string) $raw
             );
+            $statusAttribute = $customer->getCustomAttribute(ExemptionStatus::ATTRIBUTE_CODE);
+            $status = strtolower(trim((string) ($statusAttribute?->getValue() ?? '')));
         } catch (\Throwable $e) {
             $this->logger->error('Exemptax failed loading exemption states', [
                 'customer_id' => $customerId,
                 'error' => $e->getMessage(),
             ]);
-            $states = [];
         }
 
-        $this->customerStatesCache[$customerId] = $states;
+        $this->customerExemptionCache[$customerId] = [
+            'states' => $states,
+            'status' => $status,
+        ];
 
-        return $states;
+        return $this->customerExemptionCache[$customerId];
     }
 
     private function resolveRegionCode(Address $address): ?string

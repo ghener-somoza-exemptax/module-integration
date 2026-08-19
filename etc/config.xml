@@ -17,6 +17,7 @@
                 <tax_exempt_flag>0</tax_exempt_flag>
                 <ac_customer_groups></ac_customer_groups>
                 <sync_customer_tags>0</sync_customer_tags>
+                <grandfathered_entire_exemption>0</grandfathered_entire_exemption>
                 <last_sync_at></last_sync_at>
                 <settings_locked>0</settings_locked>
             </general>

@@ -9,6 +9,7 @@ $rawLastSync = $block->getRawLastSync();
 $localGroups = $block->getLocalCustomerGroups();
 $selectedGroupIds = $block->getSelectedCustomerGroupIds();
 $syncCustomerTags = (int) ($settings['sync_customer_tags'] ?? 0);
+$grandfatheredEntireExemption = (int) ($settings['grandfathered_entire_exemption'] ?? 0);
 ?>
 <style>
 .exemptax-settings-cell {
@@ -167,6 +168,23 @@ $syncCustomerTags = (int) ($settings['sync_customer_tags'] ?? 0);
         </div>
 
         <div class="exx-field">
+            <label for="exemptax_grandfathered_entire_exemption"><?= $block->escapeHtml(__('Legacy exemption status update')) ?></label>
+            <select id="exemptax_grandfathered_entire_exemption" <?= $locked ? 'disabled' : '' ?>>
+                <option value="0" <?= $grandfatheredEntireExemption === 0 ? 'selected' : '' ?>>
+                    <?= $block->escapeHtml(__('Disabled')) ?>
+                </option>
+                <option value="1" <?= $grandfatheredEntireExemption === 1 ? 'selected' : '' ?>>
+                    <?= $block->escapeHtml(__('Enabled')) ?>
+                </option>
+            </select>
+            <p class="exx-help">
+                <?= $block->escapeHtml(__(
+                    'Marks the customer as tax exempt across all states, rather than only in the states covered by the exemption certificate.'
+                )) ?>
+            </p>
+        </div>
+
+        <div class="exx-field">
             <label for="exemptax_ac_customer_groups"><?= $block->escapeHtml(__('Customer groups')) ?></label>
             <select id="exemptax_ac_customer_groups"
                     class="admin__control-multiselect"
@@ -251,6 +269,7 @@ require(['jquery', 'Magento_Ui/js/modal/alert'], function ($, uiAlert) {
     var formKey = root.data('form-key');
     var $engine = $('#exemptax_tax_engine');
     var $flag = $('#exemptax_tax_exempt_flag');
+    var $legacy = $('#exemptax_grandfathered_entire_exemption');
     var $groups = $('#exemptax_ac_customer_groups');
     var $syncTags = $('#exemptax_sync_customer_tags');
     var $save = $('#exemptax-settings-save');
@@ -318,7 +337,11 @@ require(['jquery', 'Magento_Ui/js/modal/alert'], function ($, uiAlert) {
             $engine.val(data.tax_engine);
         }
         if (typeof data.tax_exempt_flag !== 'undefined') {
-            $flag.val(String(data.tax_exempt_flag));
+            var flag = Number(data.tax_exempt_flag);
+            $flag.val(String(flag === 3 ? 2 : flag));
+        }
+        if (typeof data.grandfathered_entire_exemption !== 'undefined') {
+            $legacy.val(String(Number(data.grandfathered_entire_exemption) ? 1 : 0));
         }
         applyCustomerGroups(data.ac_customer_groups);
         if (typeof data.sync_customer_tags !== 'undefined') {
@@ -327,6 +350,7 @@ require(['jquery', 'Magento_Ui/js/modal/alert'], function ($, uiAlert) {
         var locked = !!data.locked;
         $engine.prop('disabled', locked);
         $flag.prop('disabled', locked);
+        $legacy.prop('disabled', locked);
         $groups.prop('disabled', locked);
         $syncTags.prop('disabled', locked);
         $locked.toggle(locked);
@@ -416,6 +440,7 @@ require(['jquery', 'Magento_Ui/js/modal/alert'], function ($, uiAlert) {
                 form_key: formKey,
                 tax_engine: $engine.val(),
                 tax_exempt_flag: $flag.val(),
+                grandfathered_entire_exemption: $legacy.val(),
                 ac_customer_groups: $groups.val() || [],
                 sync_customer_tags: $syncTags.val()
             }
