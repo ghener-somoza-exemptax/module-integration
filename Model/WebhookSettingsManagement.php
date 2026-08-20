@@ -84,6 +84,7 @@ class WebhookSettingsManagement implements WebhookSettingsManagementInterface
                 throw new LocalizedException(__('taxEngine must be magento or taxjar.'));
             }
             $this->configWriter->save(Config::XML_PATH_TAX_ENGINE, $engine);
+            $this->syncTaxJarCheckoutEnabled($engine);
         }
 
         if ($taxExemptFlag !== null) {
@@ -187,6 +188,7 @@ class WebhookSettingsManagement implements WebhookSettingsManagementInterface
             $engine = strtolower(trim((string) $data['tax_engine']));
             if (in_array($engine, ['magento', 'taxjar'], true)) {
                 $this->configWriter->save(Config::XML_PATH_TAX_ENGINE, $engine);
+                $this->syncTaxJarCheckoutEnabled($engine);
             }
         }
         if (array_key_exists('tax_exempt_flag', $data)) {
@@ -229,6 +231,18 @@ class WebhookSettingsManagement implements WebhookSettingsManagementInterface
 
         $this->cacheTypeList->cleanType('config');
         $this->reinitableConfig->reinit();
+    }
+
+    /**
+     * Native Magento tax must not compete with TaxJar SmartCalcs.
+     * tax_engine=magento → Enabled for Checkout = No; taxjar → Yes.
+     */
+    private function syncTaxJarCheckoutEnabled(string $engine): void
+    {
+        $this->configWriter->save(
+            Config::XML_PATH_TAXJAR_CHECKOUT_ENABLED,
+            $engine === 'taxjar' ? '1' : '0'
+        );
     }
 
     /**

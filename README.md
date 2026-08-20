@@ -154,8 +154,8 @@ Keep this Magento native tax hook disabled or unused on TaxJar stores (one check
 
 Exemptax auto-pushes on Sync / settings save via
 `PUT /V1/exemptax/integration/webhook-settings`:
-- `tax_engine=magento` → `apply_state_exemptions=1`
-- `tax_engine=taxjar` (or any non-magento engine) → `apply_state_exemptions=0`
+- `tax_engine=magento` → `apply_state_exemptions=1` and TaxJar **Enabled for Checkout** = No (`tax/taxjar/enabled=0`)
+- `tax_engine=taxjar` (or any non-magento engine) → `apply_state_exemptions=0` and TaxJar **Enabled for Checkout** = Yes (`tax/taxjar/enabled=1`)
 - company settings mirror: `settingsUrl`, `taxEngine`, `taxExemptFlag`, `acCustomerGroups`, `syncCustomerTags`, `lastSyncAt`, `settingsLocked`
 
 ## Ecommerce certificate form (Shopify-style embed)

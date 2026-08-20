@@ -19,6 +19,8 @@ class Config
     public const XML_PATH_ECOMMERCE_DROP_URL = 'exemptax_integration/general/ecommerce_drop_url';
     public const XML_PATH_CERTIFICATES_PAGE_IDENTIFIER = 'exemptax_integration/general/certificates_page_identifier';
     public const XML_PATH_TAX_ENGINE = 'exemptax_integration/general/tax_engine';
+    /** TaxJar Sales Tax "Enabled for Checkout" (`tax/taxjar/enabled`). */
+    public const XML_PATH_TAXJAR_CHECKOUT_ENABLED = 'tax/taxjar/enabled';
     public const XML_PATH_TAX_EXEMPT_FLAG = 'exemptax_integration/general/tax_exempt_flag';
     public const XML_PATH_AC_CUSTOMER_GROUPS = 'exemptax_integration/general/ac_customer_groups';
     public const XML_PATH_SYNC_CUSTOMER_TAGS = 'exemptax_integration/general/sync_customer_tags';
