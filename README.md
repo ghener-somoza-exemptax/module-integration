@@ -123,6 +123,7 @@ When **Apply state-based tax exemptions** is Yes (default), after quote address 
 
 ### Account Information — EXEMPTAX Exempt Regions
 - Attribute: `exemptax_exemption_states` (label **EXEMPTAX Exempt Regions**)
+- Admin note: U.S. states where the customer is tax-exempt based on their EXEMPTAX certificates and integration settings. The exemption is applied according to the order's ship-to state.
 - Admin form: multiselect of US states (codes stored as `IL,MI`)
 - Data patch: `ConvertExemptionStatesToMultiselect` (`bin/magento setup:upgrade`)
 - EXEMPTAX BE continues to push CSV state codes; native tax hook and TaxJar `tj_regions` mapping are unchanged

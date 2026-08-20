@@ -65,8 +65,8 @@ class ConvertExemptionStatesToMultiselect implements DataPatchInterface
             Customer::ENTITY,
             'exemptax_exemption_states',
             'note',
-            'U.S. states where the customer is tax-exempt according to their EXEMPTAX certificates. '
-            . 'The exemption is applied based on the order\'s ship-to state.'
+            'U.S. states where the customer is tax-exempt based on their EXEMPTAX certificates and integration settings. '
+            . 'The exemption is applied according to the order\'s ship-to state.'
         );
 
         $attribute = $customerSetup->getEavConfig()->getAttribute(

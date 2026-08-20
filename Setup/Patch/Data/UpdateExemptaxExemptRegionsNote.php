@@ -10,9 +10,9 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 
 /**
- * Refresh EXEMPTAX customer attribute admin notes (main exemption type + exempt regions).
+ * Reword EXEMPTAX Exempt Regions admin note to include integration settings.
  */
-class UpdateExemptaxAttributeNotes implements DataPatchInterface
+class UpdateExemptaxExemptRegionsNote implements DataPatchInterface
 {
     public function __construct(
         private readonly ModuleDataSetupInterface $moduleDataSetup,
@@ -25,20 +25,14 @@ class UpdateExemptaxAttributeNotes implements DataPatchInterface
         $this->moduleDataSetup->getConnection()->startSetup();
 
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
-
-        $updates = [
-            'exemptax_main_exemption_type' =>
-                'Primary exemption reason determined by EXEMPTAX. For TaxJar, this is mapped to the customer\'s exemption type.',
-            'exemptax_exemption_states' =>
+        if ($customerSetup->getAttributeId(Customer::ENTITY, 'exemptax_exemption_states')) {
+            $customerSetup->updateAttribute(
+                Customer::ENTITY,
+                'exemptax_exemption_states',
+                'note',
                 'U.S. states where the customer is tax-exempt based on their EXEMPTAX certificates and integration settings. '
-                . 'The exemption is applied according to the order\'s ship-to state.',
-        ];
-
-        foreach ($updates as $code => $note) {
-            if (!$customerSetup->getAttributeId(Customer::ENTITY, $code)) {
-                continue;
-            }
-            $customerSetup->updateAttribute(Customer::ENTITY, $code, 'note', $note);
+                . 'The exemption is applied according to the order\'s ship-to state.'
+            );
         }
 
         $this->moduleDataSetup->getConnection()->endSetup();
@@ -49,9 +43,7 @@ class UpdateExemptaxAttributeNotes implements DataPatchInterface
     public static function getDependencies(): array
     {
         return [
-            AddCustomerExemptionAttributes::class,
-            AddMainExemptionTypeAttribute::class,
-            ConvertExemptionStatesToMultiselect::class,
+            UpdateExemptaxAttributeNotes::class,
         ];
     }
 

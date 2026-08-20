@@ -29,8 +29,8 @@ class CapitalizeExemptaxAttributeLabels implements DataPatchInterface
         $updates = [
             'exemptax_exemption_states' => [
                 'frontend_label' => 'EXEMPTAX Exempt Regions',
-                'note' => 'U.S. states where the customer is tax-exempt according to their EXEMPTAX certificates. '
-                    . 'The exemption is applied based on the order\'s ship-to state.',
+                'note' => 'U.S. states where the customer is tax-exempt based on their EXEMPTAX certificates and integration settings. '
+                    . 'The exemption is applied according to the order\'s ship-to state.',
             ],
             'exemptax_exemption_status' => [
                 'frontend_label' => 'EXEMPTAX Exemption Status',
