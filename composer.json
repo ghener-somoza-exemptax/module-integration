@@ -2,7 +2,7 @@
   "name": "exemptax/module-integration",
   "description": "EXEMPTAX tax-exemption integration for Adobe Commerce / Magento Open Source",
   "type": "magento2-module",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "license": ["proprietary"],
   "require": {
     "php": ">=8.1",
